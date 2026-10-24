@@ -1,0 +1,823 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#171923">
+<title>VizWars | Data Visualization Challenge</title>
+
+<style>
+:root{
+  --green:#17b995;--mint:#66ffd1;--blue:#172eff;
+  --ink:#171923;--paper:#fffdf4;--muted:#747889;
+  --orange:#ff9e43;--red:#d93045;--border:#c9c9d2;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{
+  margin:0;background-color:var(--green);
+  background-image:linear-gradient(#ffffff18 1px,transparent 1px),
+  linear-gradient(90deg,#ffffff18 1px,transparent 1px);
+  background-size:22px 22px;color:var(--ink);
+  font-family:"Courier New",monospace
+}
+button,input,select,textarea{font:inherit}
+button,a,input,select,textarea{accent-color:var(--blue)}
+button:focus-visible,a:focus-visible,input:focus-visible,
+select:focus-visible,textarea:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.shell{width:min(1450px,calc(100% - 20px));margin:18px auto;border:4px solid var(--ink);background:var(--paper)}
+.topbar{background:var(--ink);color:white;padding:20px 24px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px}
+.online{color:var(--mint)}
+main{padding:clamp(16px,4vw,42px)}
+section{margin-bottom:42px}
+.hero{background:var(--ink);color:white;padding:clamp(25px,6vw,72px);position:relative;overflow:hidden}
+.hero:after{content:"V";position:absolute;right:0;bottom:-100px;font-size:clamp(180px,35vw,420px);font-weight:900;color:#ffffff08;pointer-events:none}
+.eyebrow{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.hero .eyebrow{color:var(--mint)}
+h1{font-size:clamp(48px,9vw,104px);line-height:.9;letter-spacing:-5px;margin:18px 0}
+h1 span{color:var(--green)}
+h2{font-size:clamp(25px,4vw,40px);letter-spacing:-1.5px;line-height:1.1}
+h3{font-size:19px;margin-top:0}
+p{font-family:Arial,sans-serif;line-height:1.65;color:#535766}
+.hero p{color:#d5d7e1;max-width:650px}
+.hero-tags{display:flex;flex-wrap:wrap;gap:9px;margin:24px 0}
+.tag{padding:9px 12px;border:1px solid #ffffff45;font-size:12px}
+.tag.green{background:var(--green);color:var(--ink);border-color:var(--green)}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid #ddd;margin-bottom:25px;font-size:14px;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.field{display:flex;flex-direction:column;gap:9px;min-width:0}
+.field label{font-family:Arial,sans-serif;font-weight:700;font-size:14px}
+.field input,.field select,.field textarea{width:100%;min-height:51px;padding:12px;border:2px solid #bfc0cc;background:white;color:var(--ink);border-radius:0}
+.field textarea{min-height:145px;resize:vertical;line-height:1.5}
+.field input:disabled,.field select:disabled{background:#eee;color:#666}
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.btn{min-height:48px;padding:12px 19px;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);background:var(--paper);color:var(--ink);font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;gap:8px}
+.btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.btn-primary{background:var(--blue);color:white}
+.btn-green{background:var(--green)}
+.btn-orange{background:var(--orange)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:22px}
+.note{font-family:Arial,sans-serif;color:var(--muted);font-size:13px;line-height:1.65}
+.notice{background:#fff0d8;border-left:5px solid var(--orange);padding:14px 17px;font-family:Arial,sans-serif;line-height:1.6;font-size:14px;margin:20px 0}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.card{border:2px solid var(--ink);padding:21px;background:white;box-shadow:3px 3px 0 var(--ink);min-width:0}
+.card:nth-child(2){background:#fff2d9}
+.card:nth-child(3){background:#e7ecff}
+.card:nth-child(4){background:#e0fff4}
+.card p{font-size:14px}
+.dataset-card{background:white;border:2px solid var(--ink);padding:22px;min-width:0}
+.dataset-card .btn{width:100%;margin-top:10px}
+.dataset-card .field{margin-top:15px}
+.arena{background:#f0efe7;border:3px solid var(--ink);padding:clamp(14px,3vw,30px)}
+.timer-panel{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;background:var(--ink);color:white;padding:24px;margin-bottom:25px}
+.timer{font-size:clamp(45px,8vw,74px);font-weight:900;letter-spacing:-3px;font-variant-numeric:tabular-nums}
+.timer-label{font-size:12px;letter-spacing:1px;color:var(--mint)}
+.timer-note{font-size:13px;color:#d2d4dd;margin-top:8px}
+.upload-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.upload-box{padding:20px;background:white;border:2px dashed #9699a7;min-width:0}
+.upload-box input{display:block;width:100%;margin:15px 0;max-width:100%;font-size:13px}
+.file-status{font-size:13px;line-height:1.5;overflow-wrap:anywhere;color:#515463}
+.insights-box{margin-top:22px}
+.result{background:var(--ink);color:white;padding:clamp(20px,4vw,36px);margin-top:25px}
+.result h2{overflow-wrap:anywhere}
+.result p{color:#d5d7e1}
+.result-score{font-size:clamp(55px,9vw,90px);font-weight:900;color:var(--mint);letter-spacing:-4px}
+.result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0}
+.result-cell{border:1px solid #ffffff42;padding:13px;min-width:0;overflow-wrap:anywhere}
+.result-cell span{display:block;color:#c2c5d1;font-size:11px;margin-bottom:9px;text-transform:uppercase}
+.result-cell strong{font-size:14px}
+.breakdown{padding:18px;background:#ffffff0c;border:1px solid #ffffff32;margin:20px 0}
+.breakdown div{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid #ffffff25}
+.breakdown div:last-child{border:0}
+.error{color:#a32135;font-weight:bold;font-family:Arial,sans-serif;font-size:14px;margin-top:15px}
+.success{color:#08784e;font-weight:bold;font-family:Arial,sans-serif;font-size:14px;margin-top:15px}
+.hidden{display:none!important}
+footer{background:var(--ink);color:white;padding:24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px}
+@media(max-width:800px){.form-grid,.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){.shell{width:calc(100% - 10px);margin:5px auto;border-width:2px}.topbar{padding:15px;font-size:12px}main{padding:14px}.form-grid,.grid,.cards,.upload-grid,.result-grid{grid-template-columns:1fr}.hero{padding:25px 17px}h1{letter-spacing:-2px}.btn{width:100%}.timer-panel{padding:17px}.actions{gap:12px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+@media print{body{background:white}.shell{width:100%;margin:0;border:0}.topbar,#registration,#rules,#datasets,#tools,#arena,footer,.no-print{display:none!important}main{padding:0}#results{display:block!important}.result{background:white;color:black;border:2px solid black}.result p,.result-cell span{color:#333}.result-score{color:black}.result-cell{border-color:#999}.breakdown{border-color:#999}.breakdown div{border-color:#ccc}}
+</style>
+</head>
+
+<body>
+<div class="shell">
+<header class="topbar">
+  <strong>VIZ WAR / PLAYER CONSOLE</strong>
+  <span class="online">● LOCAL DEMO MODE</span>
+</header>
+
+<main>
+<section class="hero">
+  <div class="eyebrow">DATA VISUALIZATION CHALLENGE</div>
+  <h1>VIZ <span>WAR.</span></h1>
+  <p>One dataset. One tool. Forty-five minutes. Find the patterns, build your dashboard, and make the data speak.</p>
+  <div class="hero-tags">
+    <span class="tag green">45 MINUTES</span>
+    <span class="tag">50 MARKS</span>
+    <span class="tag">INDIVIDUAL CHALLENGE</span>
+    <span class="tag">B.TECH / YEARS 1–4</span>
+  </div>
+  <a class="btn btn-green" href="#registration">REGISTER TO PLAY →</a>
+</section>
+
+<section id="registration">
+  <div class="heading"><span>Player registration</span><span>Required fields *</span></div>
+  <form id="registrationForm">
+    <div class="form-grid">
+      <div class="field">
+        <label for="name">Full name *</label>
+        <input id="name" maxlength="100" autocomplete="name" required placeholder="Your full name">
+      </div>
+      <div class="field">
+        <label for="roll">Roll number *</label>
+        <input id="roll" maxlength="40" required placeholder="Your roll number">
+      </div>
+      <div class="field">
+        <label for="year">Year of study *</label>
+        <select id="year" required>
+          <option value="">Select year</option>
+          <option>1st Year</option><option>2nd Year</option>
+          <option>3rd Year</option><option>4th Year</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="branch">Branch *</label>
+        <select id="branch" required>
+          <option value="">Select branch</option>
+          <option>CSE (Data Science)</option><option>CSE</option>
+          <option>CSE (AI &amp; ML)</option><option>Information Technology</option>
+          <option>ECE</option><option>EEE</option><option>Mechanical Engineering</option>
+          <option>Civil Engineering</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="section">Section *</label>
+        <select id="section" required>
+          <option value="">Select section</option>
+          <option>A</option><option>B</option><option>C</option><option>D</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="team">Team name (optional)</label>
+        <input id="team" maxlength="60" placeholder="Your team name">
+      </div>
+    </div>
+    <div class="notice"><strong>Demo privacy:</strong> registration and selected files stay in this browser session. No information is sent to an organizer. Use a connected server for an official event.</div>
+    <div class="actions">
+      <button class="btn btn-primary" type="submit" id="registerBtn">REGISTER PLAYER →</button>
+      <button class="btn" type="reset" id="clearBtn">CLEAR FORM</button>
+    </div>
+    <div id="registrationMessage" role="status" aria-live="polite"></div>
+  </form>
+</section>
+
+<section id="rules">
+  <div class="heading"><span>Six rules</span><span>Read before you begin</span></div>
+  <div class="cards">
+    <article class="card"><div class="eyebrow">RULE 01</div><h3>Choose one dataset</h3><p>Download one of the datasets below and analyze it in your chosen tool.</p></article>
+    <article class="card"><div class="eyebrow">RULE 02</div><h3>Choose one tool</h3><p>Excel, Power BI, Tableau, or Python. Work independently.</p></article>
+    <article class="card"><div class="eyebrow">RULE 03</div><h3>Clean honestly</h3><p>Check duplicates, missing values, and data types. Document important changes.</p></article>
+    <article class="card"><div class="eyebrow">RULE 04</div><h3>Visualize with purpose</h3><p>Use suitable charts, clear labels, and readable colors.</p></article>
+    <article class="card"><div class="eyebrow">RULE 05</div><h3>Explain three insights</h3><p>Write three evidence-based findings that your analysis supports.</p></article>
+    <article class="card"><div class="eyebrow">RULE 06</div><h3>Upload your work</h3><p>Submit a dashboard export, editable source file, and insight write-up before the deadline.</p></article>
+  </div>
+</section>
+
+<section id="datasets">
+  <div class="heading"><span>Dataset library</span><span>Download CSV</span></div>
+  <p>Pick a dataset and download its CSV file. These are small, fictional or illustrative datasets intended for practice; the COVID-style data is not official public-health data.</p>
+  <div class="grid">
+    <article class="dataset-card">
+      <div class="eyebrow">DATASET 01</div><h3>Retail Sales</h3>
+      <p>Compare revenue, products, regions, and monthly performance.</p>
+      <div class="field"><label for="salesHint">Challenge prompt</label><select id="salesHint"><option>Find the strongest region</option><option>Compare product revenue</option><option>Analyze monthly trends</option></select></div>
+      <button class="btn btn-green" data-download="sales">DOWNLOAD SALES CSV ↓</button>
+    </article>
+    <article class="dataset-card">
+      <div class="eyebrow">DATASET 02</div><h3>IPL Cricket</h3>
+      <p>Explore team runs, wickets, matches, and player performance.</p>
+      <div class="field"><label for="iplHint">Challenge prompt</label><select id="iplHint"><option>Compare team performance</option><option>Find the top scorer</option><option>Explore wickets and wins</option></select></div>
+      <button class="btn btn-green" data-download="ipl">DOWNLOAD IPL CSV ↓</button>
+    </article>
+    <article class="dataset-card">
+      <div class="eyebrow">DATASET 03</div><h3>Student Marks</h3>
+      <p>Study subject scores, attendance, and academic performance.</p>
+      <div class="field"><label for="marksHint">Challenge prompt</label><select id="marksHint"><option>Compare subject averages</option><option>Explore attendance patterns</option><option>Find performance gaps</option></select></div>
+      <button class="btn btn-green" data-download="marks">DOWNLOAD MARKS CSV ↓</button>
+    </article>
+    <article class="dataset-card">
+      <div class="eyebrow">DATASET 04</div><h3>Daily Case Trends</h3>
+      <p>Explore illustrative daily case counts and recoveries over time.</p>
+      <div class="field"><label for="covidHint">Challenge prompt</label><select id="covidHint"><option>Compare cases and recoveries</option><option>Find peak case days</option><option>Explore daily changes</option></select></div>
+      <button class="btn btn-green" data-download="covid">DOWNLOAD CASES CSV ↓</button>
+    </article>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="heading"><span>Approved tools</span><span>Pick one</span></div>
+  <div class="grid">
+    <article class="card"><h3>Microsoft Excel</h3><p>Pivot tables, formulas, and charts.</p><a class="btn" href="https://www.microsoft.com/microsoft-365/excel" target="_blank" rel="noopener noreferrer">OPEN EXCEL ↗</a></article>
+    <article class="card"><h3>Power BI</h3><p>Interactive reports and dashboards.</p><a class="btn" href="https://powerbi.microsoft.com/" target="_blank" rel="noopener noreferrer">OPEN POWER BI ↗</a></article>
+    <article class="card"><h3>Tableau</h3><p>Interactive visual exploration.</p><a class="btn" href="https://www.tableau.com/" target="_blank" rel="noopener noreferrer">OPEN TABLEAU ↗</a></article>
+    <article class="card"><h3>Python</h3><p>Analyze data with pandas and plotting libraries.</p><a class="btn" href="https://www.python.org/" target="_blank" rel="noopener noreferrer">OPEN PYTHON ↗</a></article>
+  </div>
+</section>
+
+<section id="arena">
+  <div class="heading"><span>Competition arena</span><span>45 minutes / 50 marks</span></div>
+  <div class="arena">
+    <div class="timer-panel">
+      <div>
+        <div class="timer-label" id="timerLabel">WAITING FOR REGISTRATION</div>
+        <div class="timer" id="timer" role="timer" aria-live="off">45:00</div>
+        <div class="timer-note" id="timerNote">Register first, then start the challenge.</div>
+      </div>
+      <div class="actions no-print">
+        <button class="btn btn-green" id="startTimerBtn" disabled>START TIMER</button>
+        <button class="btn btn-primary" id="submitBtn" disabled>SUBMIT WORK →</button>
+      </div>
+    </div>
+
+    <h3>Upload your deliverables</h3>
+    <p class="note">Files are selected from your device. In this demo, they are checked locally and are not uploaded to a server. Keep your own copies.</p>
+
+    <div class="upload-grid">
+      <div class="upload-box">
+        <h3>01 / Dashboard export *</h3>
+        <p class="note">Upload a PDF, PNG, or JPEG export of your completed dashboard.</p>
+        <input type="file" id="dashboardFile" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg">
+        <div class="file-status" id="dashboardStatus">No dashboard file selected.</div>
+      </div>
+      <div class="upload-box">
+        <h3>02 / Editable source file *</h3>
+        <p class="note">Upload the workbook or code used to build your analysis.</p>
+        <input type="file" id="sourceFile" accept=".xlsx,.xls,.csv,.pbix,.twb,.twbx,.py,.ipynb,.ods,.numbers,.r,.sql,.js,.json,.txt,.zip">
+        <div class="file-status" id="sourceStatus">No source file selected.</div>
+      </div>
+    </div>
+
+    <div class="field insights-box">
+      <label for="insights">03 / Three analytical insights *</label>
+      <textarea id="insights" maxlength="5000" placeholder="1. The data shows that...&#10;2. Compared with..., ...&#10;3. This suggests..."></textarea>
+      <div class="note">Write three numbered findings with specific observations from your selected dataset. Aim for at least 30 words in total.</div>
+    </div>
+
+    <div class="notice"><strong>Deadline policy:</strong> 45 minutes plus a 52-second grace window. Submissions in the grace window receive a 2-mark penalty. The demo timer uses this browser's clock; official events should validate deadlines on a server.</div>
+
+    <div id="arenaMessage" role="status" aria-live="polite" class="note">Register to unlock the timer and submission.</div>
+  </div>
+</section>
+
+<section id="results" class="hidden">
+  <div class="heading"><span>Instant result</span><span>Player report</span></div>
+  <div class="result">
+    <div class="eyebrow" style="color:var(--mint)">VIZ WAR / SUBMISSION RECEIPT</div>
+    <h2 id="resultName">Participant</h2>
+    <p id="resultStatus">Submission processed.</p>
+    <div class="result-score"><span id="resultScore">0</span><span style="font-size:24px"> / 50</span></div>
+    <p id="resultExplanation">Result summary</p>
+
+    <div class="result-grid">
+      <div class="result-cell"><span>Roll number</span><strong id="resultRoll">—</strong></div>
+      <div class="result-cell"><span>Year</span><strong id="resultYear">—</strong></div>
+      <div class="result-cell"><span>Branch / section</span><strong id="resultBranch">—</strong></div>
+      <div class="result-cell"><span>Dataset</span><strong id="resultDataset">—</strong></div>
+      <div class="result-cell"><span>Timing</span><strong id="resultTiming">—</strong></div>
+      <div class="result-cell"><span>Submission ID</span><strong id="resultId">—</strong></div>
+    </div>
+
+    <h3>Score breakdown</h3>
+    <div class="breakdown" id="scoreBreakdown"></div>
+    <p>Important: this is an automated submission-completeness score generated in your browser, not an official assessment of visual quality or analytical correctness. The demo does not send or preserve the submission on an event server.</p>
+    <div class="actions no-print">
+      <button class="btn btn-green" id="downloadResultBtn">DOWNLOAD RESULT CSV ↓</button>
+      <button class="btn" id="printBtn">PRINT / SAVE PDF</button>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <span>VIZ WAR. / MAKE THE DATA SPEAK.</span>
+  <span>45 MINUTES · 50 MARKS</span>
+  <span>Local demo — no server connected.</span>
+</footer>
+</div>
+
+<script>
+"use strict";
+
+(() => {
+  const $ = id => document.getElementById(id);
+  const form = $("registrationForm");
+
+  const datasets = {
+    sales: {
+      filename: "vizwars_sales.csv",
+      title: "Retail Sales",
+      csv: `Month,Region,Product,Units,UnitPrice,Revenue
+Jan,North,Laptop,12,45000,540000
+Jan,South,Phone,45,18000,810000
+Jan,East,Tablet,20,15000,300000
+Jan,West,Laptop,9,45000,405000
+Feb,North,Phone,38,18000,684000
+Feb,South,Laptop,15,45000,675000
+Feb,East,Phone,52,18000,936000
+Feb,West,Tablet,27,15000,405000
+Mar,North,Tablet,32,15000,480000
+Mar,South,Phone,61,18000,1098000
+Mar,East,Laptop,14,45000,630000
+Mar,West,Phone,43,18000,774000
+Apr,North,Laptop,17,45000,765000
+Apr,South,Tablet,35,15000,525000
+Apr,East,Phone,57,18000,1026000
+Apr,West,Laptop,11,45000,495000
+May,North,Phone,49,18000,882000
+May,South,Laptop,18,45000,810000
+May,East,Tablet,39,15000,585000
+May,West,Phone,55,18000,990000
+Jun,North,Tablet,41,15000,615000
+Jun,South,Phone,68,18000,1224000
+Jun,East,Laptop,19,45000,855000
+Jun,West,Tablet,33,15000,495000`
+    },
+    ipl: {
+      filename: "vizwars_ipl.csv",
+      title: "IPL Cricket",
+      csv: `Team,Matches,Wins,Losses,RunsScored,WicketsTaken
+Team A,14,9,5,2450,92
+Team B,14,8,6,2380,85
+Team C,14,7,7,2295,79
+Team D,14,10,4,2510,98
+Team E,14,6,8,2205,74
+Team F,14,5,9,2140,70
+Team G,14,8,6,2410,88
+Team H,14,7,7,2320,81
+Team I,14,4,10,2050,66
+Team J,14,9,5,2475,94`
+    },
+    marks: {
+      filename: "vizwars_student_marks.csv",
+      title: "Student Marks",
+      csv: `StudentID,Subject,Marks,AttendancePercent,StudyHours
+S001,Mathematics,88,95,3.5
+S002,Mathematics,72,82,2.0
+S003,Mathematics,91,98,4.0
+S004,Mathematics,64,75,1.5
+S005,Mathematics,78,88,2.5
+S006,DBMS,84,92,3.0
+S007,DBMS,69,80,2.0
+S008,DBMS,95,99,4.5
+S009,DBMS,73,85,2.5
+S010,DBMS,81,90,3.0
+S011,Java,90,96,4.0
+S012,Java,76,87,2.5
+S013,Java,67,78,1.5
+S014,Java,86,94,3.5
+S015,Java,80,89,3.0
+S016,Mathematics,59,68,1.0
+S017,DBMS,88,93,3.5
+S018,Java,93,97,4.0`
+    },
+    covid: {
+      filename: "vizwars_daily_cases.csv",
+      title: "Illustrative Daily Case Trends",
+      csv: `Date,NewCases,Recoveries,Tests
+2025-01-01,120,95,1800
+2025-01-02,135,102,1900
+2025-01-03,148,110,2000
+2025-01-04,162,118,2100
+2025-01-05,155,125,2050
+2025-01-06,180,132,2250
+2025-01-07,205,145,2400
+2025-01-08,198,152,2350
+2025-01-09,220,164,2500
+2025-01-10,245,180,2700
+2025-01-11,230,192,2600
+2025-01-12,215,201,2550
+2025-01-13,190,208,2450
+2025-01-14,175,214,2400`
+    }
+  };
+
+  const state = {
+    participant: null,
+    dataset: null,
+    started: false,
+    submitted: false,
+    expired: false,
+    startTime: 0,
+    deadline: 0,
+    graceDeadline: 0,
+    timerId: null,
+    result: null
+  };
+
+  const DURATION = 45 * 60 * 1000;
+  const GRACE = 52 * 1000;
+  const PENALTY = 2;
+
+  function message(id, text, type = "") {
+    const el = $(id);
+    el.className = type;
+    el.textContent = text;
+  }
+
+  function downloadText(filename, content, type = "text/csv;charset=utf-8") {
+    const blob = new Blob(["\uFEFF", content], {type});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  document.querySelectorAll("[data-download]").forEach(button => {
+    button.addEventListener("click", () => {
+      const dataset = datasets[button.dataset.download];
+      if (!dataset) return;
+      downloadText(dataset.filename, dataset.csv);
+    });
+  });
+
+  function lockForm(locked) {
+    Array.from(form.elements).forEach(element => {
+      if (element.id !== "clearBtn" && element.type !== "submit") {
+        element.disabled = locked;
+      }
+    });
+    $("registerBtn").disabled = locked;
+  }
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    if (state.participant || state.started) return;
+
+    const participant = {
+      name: $("name").value.trim(),
+      roll: $("roll").value.trim(),
+      year: $("year").value,
+      branch: $("branch").value,
+      section: $("section").value,
+      team: $("team").value.trim()
+    };
+
+    if (!participant.name || !participant.roll || !participant.year ||
+        !participant.branch || !participant.section) {
+      message("registrationMessage", "Complete all required fields.", "error");
+      return;
+    }
+
+    state.participant = participant;
+    lockForm(true);
+    $("startTimerBtn").disabled = false;
+    message(
+      "registrationMessage",
+      "Registration complete for this browser session. Choose your dataset and start when ready.",
+      "success"
+    );
+    message("arenaMessage", "Select a dataset from the library, then start your timer.");
+    $("arena").scrollIntoView({behavior:"smooth"});
+  });
+
+  $("clearBtn").addEventListener("click", () => {
+    if (state.participant || state.started) {
+      message("registrationMessage", "Registration cannot be cleared after registering.", "error");
+      return;
+    }
+    message("registrationMessage", "");
+  });
+
+  function timeString(ms) {
+    const total = Math.max(0, Math.ceil(ms / 1000));
+    return String(Math.floor(total / 60)).padStart(2, "0") + ":" +
+      String(total % 60).padStart(2, "0");
+  }
+
+  function updateTimer() {
+    if (!state.started || state.submitted || state.expired) return;
+
+    const now = Date.now();
+
+    if (now < state.deadline) {
+      $("timer").textContent = timeString(state.deadline - now);
+      $("timerLabel").textContent = "TIME REMAINING";
+      $("timerNote").textContent = "Download your dataset, analyze it, and submit before time runs out.";
+      return;
+    }
+
+    if (now < state.graceDeadline) {
+      $("timer").textContent = "+" + timeString(state.graceDeadline - now);
+      $("timerLabel").textContent = "GRACE WINDOW";
+      $("timerNote").textContent = "A 2-mark late penalty applies to submissions now.";
+      message("arenaMessage", "The deadline has passed. Submit before the grace window ends.", "error");
+      return;
+    }
+
+    state.expired = true;
+    $("timer").textContent = "00:00";
+    $("timerLabel").textContent = "SESSION CLOSED";
+    $("timerNote").textContent = "The submission window has ended.";
+    $("submitBtn").disabled = true;
+    $("startTimerBtn").disabled = true;
+    message("arenaMessage", "The submission window is closed.", "error");
+
+    if (state.timerId) {
+      clearInterval(state.timerId);
+      state.timerId = null;
+    }
+  }
+
+  $("startTimerBtn").addEventListener("click", () => {
+    if (!state.participant || state.started || state.submitted) return;
+
+    state.dataset = Object.keys(datasets).find(key =>
+      datasets[key].title === $("selectedDataset")?.value
+    ) || "sales";
+
+    state.started = true;
+    state.startTime = Date.now();
+    state.deadline = state.startTime + DURATION;
+    state.graceDeadline = state.deadline + GRACE;
+
+    $("startTimerBtn").disabled = true;
+    $("submitBtn").disabled = false;
+    $("timerLabel").textContent = "TIME REMAINING";
+
+    message("arenaMessage", "Timer started. Download a dataset, build your dashboard, and upload your files.");
+    updateTimer();
+    state.timerId = setInterval(updateTimer, 1000);
+  });
+
+  // A required dataset choice is added to the arena after registration.
+  const datasetField = document.createElement("div");
+  datasetField.className = "field";
+  datasetField.style.marginBottom = "22px";
+  datasetField.innerHTML = `
+    <label for="selectedDataset">Dataset selected for your analysis *</label>
+    <select id="selectedDataset" required>
+      <option value="">Choose a dataset</option>
+      <option value="Retail Sales">Retail Sales</option>
+      <option value="IPL Cricket">IPL Cricket</option>
+      <option value="Student Marks">Student Marks</option>
+      <option value="Illustrative Daily Case Trends">Illustrative Daily Case Trends</option>
+    </select>
+    <div class="note">Choose the same dataset you download and analyze. The selection is included in your result.</div>
+  `;
+  $("arena").querySelector(".arena").insertBefore(
+    datasetField, $("arena").querySelector(".timer-panel")
+  );
+
+  $("startTimerBtn").addEventListener("click", () => {
+    const selected = $("selectedDataset").value;
+    if (!selected) {
+      if (!state.started) {
+        message("arenaMessage", "Choose a dataset before starting the timer.", "error");
+      }
+      return;
+    }
+    state.dataset = Object.keys(datasets).find(key => datasets[key].title === selected);
+  }, true);
+
+  // Check that uploaded files have an allowed extension and nonzero size.
+  function checkFile(inputId, statusId, allowedExtensions) {
+    const input = $(inputId);
+    const file = input.files && input.files[0];
+
+    if (!file) {
+      $(statusId).textContent = "No file selected.";
+      return null;
+    }
+
+    const extension = file.name.includes(".")
+      ? file.name.split(".").pop().toLowerCase()
+      : "";
+
+    if (!allowedExtensions.includes(extension) || file.size === 0) {
+      input.value = "";
+      $(statusId).textContent = "Unsupported or empty file. Please choose a valid file.";
+      return null;
+    }
+
+    $(statusId).textContent =
+      "Selected: " + file.name + " (" + (file.size / 1024).toFixed(1) + " KB)";
+    return file;
+  }
+
+  $("dashboardFile").addEventListener("change", () => {
+    checkFile("dashboardFile", "dashboardStatus", ["pdf","png","jpg","jpeg"]);
+  });
+
+  $("sourceFile").addEventListener("change", () => {
+    checkFile("sourceFile", "sourceStatus", [
+      "xlsx","xls","csv","pbix","twb","twbx","py","ipynb","ods",
+      "numbers","r","sql","js","json","txt","zip"
+    ]);
+  });
+
+  function evaluateSubmission() {
+    const dashboard = checkFile(
+      "dashboardFile", "dashboardStatus", ["pdf","png","jpg","jpeg"]
+    );
+    const source = checkFile(
+      "sourceFile", "sourceStatus",
+      ["xlsx","xls","csv","pbix","twb","twbx","py","ipynb","ods",
+       "numbers","r","sql","js","json","txt","zip"]
+    );
+
+    const insights = $("insights").value.trim();
+    const words = insights.match(/\b[\p{L}\p{N}][\p{L}\p{N}'’-]*\b/gu) || [];
+    const numberedFindings = insights.match(/(?:^|\n)\s*(?:[1-3][.)]|[-•])\s+\S/g) || [];
+    const insightValid = words.length >= 30 && numberedFindings.length >= 3;
+    const datasetValid = Boolean(state.dataset);
+
+    // Automatic score: file presence/validity, insight completeness, dataset selection.
+    // The browser cannot verify dashboard quality or whether insights are true.
+    const breakdown = [
+      {label:"Dashboard export selected and valid", points:15, earned:dashboard ? 15 : 0},
+      {label:"Editable source file selected and valid", points:15, earned:source ? 15 : 0},
+      {label:"Three written insights with at least 30 words", points:15, earned:insightValid ? 15 : 0},
+      {label:"Dataset selected for the challenge", points:5, earned:datasetValid ? 5 : 0}
+    ];
+
+    const base = breakdown.reduce((sum, item) => sum + item.earned, 0);
+    const late = Date.now() >= state.deadline;
+    const penalty = late ? PENALTY : 0;
+    const final = Math.max(0, base - penalty);
+
+    return {
+      dashboard, source, insights, words: words.length,
+      insightValid, breakdown, base, penalty, final, late
+    };
+  }
+
+  function renderResult(result) {
+    const p = state.participant;
+    $("resultName").textContent = p.name;
+    $("resultRoll").textContent = p.roll;
+    $("resultYear").textContent = p.year;
+    $("resultBranch").textContent = p.branch + " / " + p.section;
+    $("resultDataset").textContent = datasets[state.dataset]?.title || "Not selected";
+    $("resultTiming").textContent = result.late ? "Grace window (-2)" : "On time";
+    $("resultId").textContent = "VW-" + Date.now().toString(36).toUpperCase();
+    $("resultScore").textContent = result.final;
+
+    $("resultStatus").textContent = result.final === 50
+      ? "All automatic submission checks passed."
+      : "Your result has been generated from the submission checks.";
+
+    $("resultExplanation").textContent =
+      "Automatic checks: " + result.base + "/50 before any late penalty. " +
+      (result.penalty ? "Late penalty: -" + result.penalty + " marks." : "No late penalty.") +
+      " Written insight length: " + result.words + " words.";
+
+    const breakdown = $("scoreBreakdown");
+    breakdown.replaceChildren();
+
+    result.breakdown.forEach(item => {
+      const row = document.createElement("div");
+      const label = document.createElement("span");
+      const points = document.createElement("strong");
+      label.textContent = item.label;
+      points.textContent = item.earned + " / " + item.points;
+      row.append(label, points);
+      breakdown.appendChild(row);
+    });
+
+    if (result.penalty) {
+      const row = document.createElement("div");
+      const label = document.createElement("span");
+      const points = document.createElement("strong");
+      label.textContent = "Late submission penalty";
+      points.textContent = "-2";
+      row.append(label, points);
+      breakdown.appendChild(row);
+    }
+
+    const totalRow = document.createElement("div");
+    const totalLabel = document.createElement("strong");
+    const totalPoints = document.createElement("strong");
+    totalLabel.textContent = "FINAL AUTOMATED SCORE";
+    totalPoints.textContent = result.final + " / 50";
+    totalRow.append(totalLabel, totalPoints);
+    breakdown.appendChild(totalRow);
+
+    $("results").classList.remove("hidden");
+    $("results").scrollIntoView({behavior:"smooth"});
+  }
+
+  $("submitBtn").addEventListener("click", () => {
+    if (!state.started || state.submitted || state.expired) return;
+
+    const now = Date.now();
+    if (now >= state.graceDeadline) {
+      updateTimer();
+      return;
+    }
+
+    if (!$("selectedDataset").value) {
+      message("arenaMessage", "Select the dataset you analyzed before submitting.", "error");
+      return;
+    }
+
+    if (!$("dashboardFile").files.length || !$("sourceFile").files.length) {
+      message("arenaMessage", "Upload both your dashboard export and editable source file.", "error");
+      return;
+    }
+
+    const text = $("insights").value.trim();
+    const words = text.match(/\b[\p{L}\p{N}][\p{L}\p{N}'’-]*\b/gu) || [];
+    const numbered = text.match(/(?:^|\n)\s*(?:[1-3][.)]|[-•])\s+\S/g) || [];
+
+    if (words.length < 30 || numbered.length < 3) {
+      message(
+        "arenaMessage",
+        "Write three numbered insights (1., 2., 3.) with at least 30 words in total before submitting.",
+        "error"
+      );
+      return;
+    }
+
+    state.dataset = Object.keys(datasets).find(
+      key => datasets[key].title === $("selectedDataset").value
+    );
+
+    if (!state.dataset) {
+      message("arenaMessage", "Please choose a valid dataset.", "error");
+      return;
+    }
+
+    const result = evaluateSubmission();
+
+    if (!result.dashboard || !result.source) {
+      message("arenaMessage", "One or more files are invalid. Check the upload fields.", "error");
+      return;
+    }
+
+    state.submitted = true;
+    state.result = result;
+
+    if (state.timerId) {
+      clearInterval(state.timerId);
+      state.timerId = null;
+    }
+
+    $("submitBtn").disabled = true;
+    $("startTimerBtn").disabled = true;
+    $("timerLabel").textContent = "SUBMITTED";
+    $("timerNote").textContent = "Your local result is ready.";
+
+    message(
+      "arenaMessage",
+      "Submission processed. Your automated result is displayed below.",
+      "success"
+    );
+
+    renderResult(result);
+  });
+
+  $("downloadResultBtn").addEventListener("click", () => {
+    if (!state.result || !state.participant) return;
+
+    const p = state.participant;
+    const r = state.result;
+    const rows = [
+      ["Field","Value"],
+      ["Name",p.name],
+      ["Roll number",p.roll],
+      ["Year",p.year],
+      ["Branch",p.branch],
+      ["Section",p.section],
+      ["Team",p.team],
+      ["Dataset",datasets[state.dataset]?.title || ""],
+      ["Automated score before penalty",r.base],
+      ["Late penalty",r.penalty],
+      ["Final automated score",r.final],
+      ["Insight word count",r.words],
+      ["Submission timing",r.late ? "Grace window" : "On time"]
+    ];
+
+    const csv = rows.map(row =>
+      row.map(value => '"' + String(value ?? "").replace(/"/g,'""') + '"').join(",")
+    ).join("\r\n");
+
+    downloadText("vizwars_result.csv", csv);
+  });
+
+  $("printBtn").addEventListener("click", () => window.print());
+
+  // Do not retain participants' information after the page is closed.
+  window.addEventListener("pagehide", () => {
+    if (state.timerId) clearInterval(state.timerId);
+  });
+})();
+</script>
+</body>
+</html>
